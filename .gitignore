@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+voice_cloning/results/
+voice_cloning/sample_voices/
