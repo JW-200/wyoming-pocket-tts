@@ -11,8 +11,7 @@ Your fridge would also like to remind you that buying vegetables was an optimist
 Meanwhile, rain clouds are approaching, the coffee machine is ready for duty, and your favorite playlist is standing by.
 """
 
-def generate_audio(name_of_your_voice_sample: Path, text: str) -> Path:
-    dir_name = name_of_your_voice_sample.split('.')[0]
+def generate_audio(dir_name: Path, text: str) -> Path:
     tensor_path = RESULT_DIRECTORY / dir_name / "model_state.safetensors"
     output_path = RESULT_DIRECTORY / dir_name / "test_audio.wav"
     
@@ -22,5 +21,6 @@ def generate_audio(name_of_your_voice_sample: Path, text: str) -> Path:
     scipy.io.wavfile.write(str(output_path), tts_model.sample_rate, audio.numpy())
     
 
-name_of_your_voice_sample = "home_sample.wav"
-generate_audio(name_of_your_voice_sample, TEST_TEXT)
+for dirs in RESULT_DIRECTORY.iterdir():
+    if dirs.is_dir():
+        generate_audio(dirs, TEST_TEXT)

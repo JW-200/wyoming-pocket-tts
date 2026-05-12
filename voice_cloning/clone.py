@@ -43,7 +43,7 @@ def clone_voice(file_path: Path, text: str) -> Path:
     
     use_clone_voice(file_path, text, wav_path)
 
-sample = fetch_sample("home_sample.wav")
+sample = fetch_sample() # specify filename as method parameter if you want to use a specific sample from the sample_voices directory
 print(f"Using reference WAV: {sample}")
 clone_voice(sample, TEST_TEXT)
 print(f"Cloned voice saved to: {RESULT_DIRECTORY / 'cloned_voice.wav'}")
