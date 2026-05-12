@@ -1,6 +1,6 @@
 # Voice Cloning
 
-## Steps:
+## Steps
 
 1. **Prepare a voice sample**
    - Add a `.wav` or `.mp3` file to `sample_voices/`

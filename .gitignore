@@ -219,3 +219,5 @@ __marimo__/
 
 voice_cloning/results/
 voice_cloning/sample_voices/
+
+src/custom_voices/
