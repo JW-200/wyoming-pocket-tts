@@ -22,5 +22,5 @@ def generate_audio(name_of_your_voice_sample: Path, text: str) -> Path:
     scipy.io.wavfile.write(str(output_path), tts_model.sample_rate, audio.numpy())
     
 
-name_of_your_voice_sample = "voice.wav"
+name_of_your_voice_sample = "home_sample.wav"
 generate_audio(name_of_your_voice_sample, TEST_TEXT)
