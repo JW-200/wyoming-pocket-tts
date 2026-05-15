@@ -54,7 +54,7 @@ class PocketTTSWrapper:
         try:
 
             for audio_chunk in self.get_model().generate_audio_stream(voice_state, text):
-                audio_array = audio_chunk.detach().cpu().numpy() * VOLUME
+                audio_array = audio_chunk.detach().cpu().numpy().flatten() * VOLUME
                 audio_bytes = (audio_array.clip(-1.0, 1.0) * 32767).astype("int16").tobytes()
                 yield audio_bytes
         except Exception as e:

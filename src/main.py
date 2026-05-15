@@ -9,7 +9,7 @@ from wyoming.info import Attribution, Info, TtsProgram, TtsVoice
 from wyoming.server import AsyncServer, AsyncTcpServer
 
 from const import (
-    DEFAULT_VOICE,
+    PRELOAD_VOICES,
     LOG_LEVEL,
     WYOMING_HOST,
     WYOMING_PORT,
@@ -82,7 +82,8 @@ async def main() -> None:
     _LOGGER.info("Ready")
     _LOGGER.info("Available voices: %s", ", ".join(ALL_VOICES.keys()))
     
-    await server.run(partial(PocketTTSEventHandler, wyoming_info))
+    synthesizer = PocketTTSWrapper(preload_model=True, preload_voices=PRELOAD_VOICES)
+    await server.run(partial(PocketTTSEventHandler, wyoming_info, synthesizer))
     
 if __name__ == "__main__":
     try:

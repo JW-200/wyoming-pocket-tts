@@ -18,28 +18,32 @@ from wyoming.tts import (
     SynthesizeStopped
 )
 
-from utils import coerce_voice_name, resolve_voice_name
-from wrapper import PocketTTSWrapper
-from const import PRELOAD_VOICES, DEFAULT_VOICE
+from utils import resolve_voice_name
+from const import DEFAULT_VOICE
 
 _LOGGER = logging.getLogger(__name__)
 
 class PocketTTSEventHandler(AsyncEventHandler):
-    def __init__(self, wyoming_info, *args, **kwargs):
+    def __init__(self, wyoming_info, synthesizer, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.wyoming_info_event = wyoming_info.event()
         self._is_streaming: Optional[bool] = None
         self._synthesize: Optional[Synthesize] = None
         self._sbd = SentenceBoundaryDetector()
-        self._synthesizer = PocketTTSWrapper(preload_model=True, preload_voices=PRELOAD_VOICES)
+        self._synthesizer = synthesizer
+        self._send_start = True
+        self._send_stop = True
+
+    def _get_timestamp(self):
+        return int(time.time() * 1000)
 
     async def handle_event(self, event):
-        if Describe.is_type(event.type):
-            await self.write_event(self.wyoming_info_event)
-            _LOGGER.debug("Sent info")
-            return True
-        
         try:
+            if Describe.is_type(event.type):
+                await self.write_event(self.wyoming_info_event)
+                _LOGGER.debug("Sent info")
+                return True
+
             if Synthesize.is_type(event.type):
                 if self._is_streaming:
                     # Ignore since this is only sent for compatibility reasons.
@@ -50,6 +54,7 @@ class PocketTTSEventHandler(AsyncEventHandler):
                 # Sent outside a stream, so we must process it
                 synthesize = Synthesize.from_event(event)
                 self._synthesize = Synthesize(text="", voice=synthesize.voice)
+                self._sbd = SentenceBoundaryDetector()
                 start_sent = False
                 for i, sentence in enumerate(self._sbd.add_chunk(synthesize.text)):
                     self._synthesize.text = sentence
@@ -72,7 +77,6 @@ class PocketTTSEventHandler(AsyncEventHandler):
                 self._is_streaming = True
                 self._sbd = SentenceBoundaryDetector()
                 self._synthesize = Synthesize(text="", voice=stream_start.voice)
-                _LOGGER.debug("Text stream started: voice=%s", stream_start.voice)
                 return True
 
             if SynthesizeChunk.is_type(event.type):
@@ -90,12 +94,10 @@ class PocketTTSEventHandler(AsyncEventHandler):
                 self._synthesize.text = self._sbd.finish()
                 if self._synthesize.text:
                     # Final audio chunk(s)
-                    await self._handle_synthesize(self._synthesize)
+                    await self._handle_synthesize(self._synthesize, send_start=True, send_stop=True)
 
-                # End of audio
                 await self.write_event(SynthesizeStopped().event())
-
-                _LOGGER.debug("Text stream stopped")
+                self._is_streaming = False
                 return True
 
             if not Synthesize.is_type(event.type):
@@ -103,22 +105,27 @@ class PocketTTSEventHandler(AsyncEventHandler):
 
             synthesize = Synthesize.from_event(event)
             return await self._handle_synthesize(synthesize)
+        except (ConnectionResetError, BrokenPipeError):
+            _LOGGER.debug("Client disconnected while writing Wyoming events")
+            return False
         except Exception as err:
-            await self.write_event(Error(text=str(err), code=err.__class__.__name__).event())
+            try:
+                await self.write_event(Error(text=str(err), code=err.__class__.__name__).event())
+            except (ConnectionResetError, BrokenPipeError):
+                _LOGGER.debug("Client disconnected before error event could be sent")
+                return False
             raise err
-        
-    async def _handle_synthesize(self, synthesize: Synthesize, send_start=True, send_stop=True):
+    
+    async def _handle_synthesize(self, synthesize: Synthesize, send_start: bool = False, send_stop: bool=False):
         voice_name = resolve_voice_name(synthesize, DEFAULT_VOICE)
         _LOGGER.debug("Synthesizing text len=%s with voice=%s", len(synthesize.text), voice_name)
+        sample_rate = self._synthesizer.get_model().sample_rate
+
+        if send_start:
+            await self.write_event(AudioStart(sample_rate, 2, 1, self._get_timestamp()).event())
+
         for chunk in self._synthesizer.synthesize(synthesize.text, voice_name):
-            if send_start:
-                await self.write_event(AudioStart(self._synthesizer.get_model().sample_rate, 2, 1).event())
-                send_start = False
-
-            await self.write_event(AudioChunk(self._synthesizer.get_model().sample_rate, 2, 1, chunk).event())
-
-        if not send_start:
-            await self.write_event(AudioStart(self._synthesizer.get_model().sample_rate, 2, 1).event())
+            await self.write_event(AudioChunk(sample_rate, 2, 1, bytes(chunk), self._get_timestamp()).event())
 
         if send_stop:
-            await self.write_event(AudioStop().event())
+            await self.write_event(AudioStop(self._get_timestamp()).event())
