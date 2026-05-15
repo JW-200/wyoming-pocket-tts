@@ -12,9 +12,10 @@ RUN uv add \
     --extra-index-url https://download.pytorch.org/whl/cpu \
     wyoming \
     zeroconf \
+    sentence-stream \
     pocket-tts 
 
 COPY src .
 
 EXPOSE 10300
-CMD ["uv", "run", "python", "wyoming_server.py"]
+CMD ["uv", "run", "python", "main.py"]

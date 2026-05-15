@@ -18,7 +18,7 @@ PRELOAD_VOICES = [
 ]
 
 # Features
-ZEROCONF = os.environ.get("ZEROCONF", "pocket-tts")
+ZEROCONF_NAME = os.environ.get("ZEROCONF", "pocket-tts")
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
 # Predefined voices
