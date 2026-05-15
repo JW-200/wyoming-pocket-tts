@@ -23,9 +23,19 @@ def discover_custom_voices() -> dict[str, str]:
 
 ALL_VOICES = {**PREDEFINED_VOICES, **discover_custom_voices()}
 
+def coerce_voice_name(voice: object | None, default_voice: str) -> str:
+    """Normalize a voice value that may be a string, object, or empty."""
+    if isinstance(voice, str):
+        return voice or default_voice
+
+    if voice and getattr(voice, "name", None):
+        return voice.name
+
+    return default_voice
+
 def resolve_voice_name(synthesize: Synthesize, default_voice: str) -> str:
     """Resolve a requested voice name to a known catalog or custom voice key."""
-    voice_name = synthesize.voice.name if synthesize.voice and synthesize.voice.name else default_voice
+    voice_name = coerce_voice_name(synthesize.voice, default_voice)
 
     if voice_name in ALL_VOICES:
         return voice_name

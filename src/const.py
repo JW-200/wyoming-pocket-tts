@@ -16,7 +16,6 @@ PRELOAD_VOICES = [
 	for voice in os.environ.get("PRELOAD_VOICES", DEFAULT_VOICE).split(",")
 	if voice.strip().strip('"').strip("'")
 ]
-STREAM_CHUNK_SIZE = int(os.environ.get("STREAM_CHUNK_SIZE", "1024"))
 
 # Features
 ZEROCONF = os.environ.get("ZEROCONF", "pocket-tts")
