@@ -26,7 +26,6 @@ Simple Wyoming TTS server using Pocket-TTS.
 - `DEFAULT_VOICE` (default: `alba`) - Voice used when the client does not request one.
 - `VOICE_DIR` (default: `/app/custom_voices/`) - Folder scanned for custom `.safetensors` voices.
 - `PRELOAD_VOICES` (default: same as `DEFAULT_VOICE`) - Comma-separated voice names to preload at startup.
-- `STREAM_CHUNK_SIZE` (default: `1024`) - Audio samples per chunk.
 - `VOLUME` (default: `1.0`) - Output gain multiplier.
 - `LOG_LEVEL` (default: `INFO`) - Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`).
 - `ZEROCONF` (default: `pocket-tts`) - Zeroconf service name shown to Home Assistant discovery.

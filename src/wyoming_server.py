@@ -1,8 +1,9 @@
 import asyncio
 import logging
 import time
-from typing import Optional
 import threading
+from queue import Queue
+from typing import AsyncIterator, Optional
 
 from sentence_stream  import SentenceBoundaryDetector
 from wyoming.audio import AudioChunk, AudioStart, AudioStop
@@ -31,13 +32,39 @@ class PocketTTSEventHandler(AsyncEventHandler):
         self._synthesize: Optional[Synthesize] = None
         self._sbd = SentenceBoundaryDetector()
         self._synthesizer = synthesizer
-        self._send_start = True
-        self._send_stop = True
 
     def _get_timestamp(self):
         return int(time.time() * 1000)
 
-    async def handle_event(self, event):
+    async def _synthesize_audio_chunks(self, text: str, voice_name: str) -> AsyncIterator[bytes]:
+        chunk_queue: Queue[object] = Queue()
+        sentinel = object()
+        errors: list[BaseException] = []
+
+        def worker() -> None:
+            try:
+                for chunk in self._synthesizer.synthesize(text, voice_name):
+                    chunk_queue.put(chunk)
+            except BaseException as err:
+                errors.append(err)
+            finally:
+                chunk_queue.put(sentinel)
+
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
+
+        while True:
+            chunk = await asyncio.to_thread(chunk_queue.get)
+            if chunk is sentinel:
+                break
+            yield chunk
+
+        await asyncio.to_thread(thread.join)
+
+        if errors:
+            raise errors[0]
+
+    async def handle_event(self, event: object) -> bool:
         try:
             if Describe.is_type(event.type):
                 await self.write_event(self.wyoming_info_event)
@@ -116,7 +143,7 @@ class PocketTTSEventHandler(AsyncEventHandler):
                 return False
             raise err
     
-    async def _handle_synthesize(self, synthesize: Synthesize, send_start: bool = False, send_stop: bool=False):
+    async def _handle_synthesize(self, synthesize: Synthesize, send_start: bool = True, send_stop: bool = True) -> None:
         voice_name = resolve_voice_name(synthesize, DEFAULT_VOICE)
         _LOGGER.debug("Synthesizing text len=%s with voice=%s", len(synthesize.text), voice_name)
         sample_rate = self._synthesizer.get_model().sample_rate
@@ -124,7 +151,7 @@ class PocketTTSEventHandler(AsyncEventHandler):
         if send_start:
             await self.write_event(AudioStart(sample_rate, 2, 1, self._get_timestamp()).event())
 
-        for chunk in self._synthesizer.synthesize(synthesize.text, voice_name):
+        async for chunk in self._synthesize_audio_chunks(synthesize.text, voice_name):
             await self.write_event(AudioChunk(sample_rate, 2, 1, bytes(chunk), self._get_timestamp()).event())
 
         if send_stop:
