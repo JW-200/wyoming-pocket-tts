@@ -15,7 +15,7 @@ def discover_custom_voices() -> dict[str, str]:
     voice_dir = Path(VOICE_DIR)
     for safetensors_file in voice_dir.glob("*.safetensors"):
         voice_name = safetensors_file.stem
-        custom_voice_name = f"custom_{voice_name}"
+        custom_voice_name = f"Custom_{voice_name}"
         custom_voices[custom_voice_name] = str(safetensors_file)
         _LOGGER.info(f"Discovered custom voice: {custom_voice_name} ({safetensors_file})")
     

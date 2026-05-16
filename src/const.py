@@ -23,5 +23,30 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 
 # Predefined voices
 PREDEFINED_VOICES = {
-    "alba": "alba",
+    "Alba (en)": "alba",
+    "Anna (en)": "anna",
+    "Azelma (en)": "azelma",
+    "Bill Boerst (en)": "bill_boerst",
+    "Caro Davy (en)": "caro_davy",
+    "Charles (en)": "charles",
+    "Cosette (en)": "cosette",
+    "Eponine (en)": "eponine",
+    "Eve (en)": "eve",
+    "Fantine (en)": "fantine",
+    "George (en)": "george",
+    "Jane (en)": "jane",
+    "Javert (en)": "javert",
+    "Jean (en)": "jean",
+	"Marius (en)": "marius",
+    "Mary (en)": "mary",
+    "Michael (en)": "michael",
+    "Paul (en)": "paul",
+    "Peter Yearsley (en)": "peter_yearsley",
+    "Stuart Bell (en)": "stuart_bell",
+    "Vera (en)": "vera",
+    "Giovanni (it)": "giovanni",
+    "Lola (es)": "lola",
+    "Juergen (de)": "juergen",
+    "Rafael (pt)": "rafael",
+    "Estelle (fr)": "estelle"
 }

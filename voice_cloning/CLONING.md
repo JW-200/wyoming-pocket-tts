@@ -3,7 +3,7 @@
 ## Steps
 
 1. **Prepare a voice sample**
-   - Add a `.wav` or `.mp3` file to `sample_voices/`
+   - Add a `.wav` file to `sample_voices/`
    - Recommended: 10-30 seconds of clean audio
 
 2. **Run cloning**
