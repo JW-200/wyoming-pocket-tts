@@ -151,8 +151,12 @@ class PocketTTSEventHandler(AsyncEventHandler):
         if send_start:
             await self.write_event(AudioStart(sample_rate, 2, 1, self._get_timestamp()).event())
 
-        async for chunk in self._synthesize_audio_chunks(synthesize.text, voice_name):
+        async for chunk in self._synthesize_audio_chunks(self._apply_padding(synthesize.text), voice_name):
             await self.write_event(AudioChunk(sample_rate, 2, 1, bytes(chunk), self._get_timestamp()).event())
 
         if send_stop:
             await self.write_event(AudioStop(self._get_timestamp()).event())
+
+    def _apply_padding(self, text: str) -> str:
+        text = text.strip()
+        return f". {text} ."

@@ -8,7 +8,7 @@ WYOMING_HOST = os.environ.get("WYOMING_HOST", "0.0.0.0")
 WYOMING_PORT = int(os.environ.get("WYOMING_PORT", "10300"))
 
 # TTS Configuration
-DEFAULT_VOICE = os.environ.get("DEFAULT_VOICE", "alba")
+DEFAULT_VOICE = os.environ.get("DEFAULT_VOICE", "Alba (en)")
 VOLUME = float(os.environ.get("VOLUME", "1.0"))
 VOICE_DIR = os.environ.get("VOICE_DIR", "/app/custom_voices/")  # Custom voice directory with .safetensors files
 PRELOAD_VOICES = [
