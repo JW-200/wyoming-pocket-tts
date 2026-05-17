@@ -23,7 +23,7 @@ Simple Wyoming TTS server using Pocket-TTS.
 
 - `WYOMING_HOST` (default: `0.0.0.0`) - Bind address inside the container.
 - `WYOMING_PORT` (default: `10300`) - Wyoming TCP port to expose.
-- `DEFAULT_VOICE` (default: `alba`) - Voice used when the client does not request one.
+- `DEFAULT_VOICE` (default: `Alba (en)`) - Voice used when the client does not request one. ([find other voices](https://github.com/JW-200/wyoming-pocket-tts/blob/main/src/const.py))
 - `VOICE_DIR` (default: `/app/custom_voices/`) - Folder scanned for custom `.safetensors` voices.
 - `PRELOAD_VOICES` (default: same as `DEFAULT_VOICE`) - Comma-separated voice names to preload at startup.
 - `VOLUME` (default: `1.0`) - Output gain multiplier.
