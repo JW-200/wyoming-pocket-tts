@@ -6,12 +6,12 @@ Simple Wyoming TTS server using Pocket-TTS.
 
 1. **Run container**
     - Run:
-        `docker run --rm -p 10300:10300 -e DEFAULT_VOICE=alba -e LOG_LEVEL=INFO ghcr.io/jw-200/wyoming-pocket-tts:0.0.1`
+        `docker run --rm -p 10300:10300 ghcr.io/jw-200/wyoming-pocket-tts:0.0.4`
 
 2. **Use custom voices (optional) ([see more](https://github.com/JW-200/wyoming-pocket-tts/blob/main/voice_cloning/CLONING.md))**
     - Put `.safetensors` files in a local folder (example: `./custom_voices`)
     - Run with volume mount:
-        `docker run --rm -p 10300:10300 -e VOICE_DIR=/app/custom_voices -v ${PWD}/custom_voices:/app/custom_voices ghcr.io/jw-200/wyoming-pocket-tts:0.0.1`
+        `docker run --rm -p 10300:10300 -e VOICE_DIR=/app/custom_voices -v ${PWD}/custom_voices:/app/custom_voices ghcr.io/jw-200/wyoming-pocket-tts:0.0.4`
     - Voice name format is: `(Custom) <file_name_without_extension>`
 
 3. **Connect from Home Assistant**
